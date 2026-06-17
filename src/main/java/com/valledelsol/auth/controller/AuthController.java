@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Migrado desde ValleDelSol.demo.controller.AuthController.
@@ -58,6 +55,22 @@ public class AuthController {
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuario creado");
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> me(
+            @RequestHeader("Authorization") String authHeader) {
+        var token = authHeader.replace("Bearer ", "");
+        var email = tokenService.getSubject(token);
+        var user = userRepository.findByEmail(email);
+        return ResponseEntity.ok(new UserResponse(
+                user.getId(),
+                user.getNombre(),
+                user.getEmail(),
+                user.getRol().name()
+        ));
+    }
+
+    public record UserResponse(Long id, String nombre, String email, String rol) {}
 
     public record RegistroRequest(String nombre, String email, String password) {}
 
