@@ -11,12 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Migrado desde ValleDelSol.demo.controller.AuthController.
- * <p>
- * NUEVO: endpoint GET /auth/validate que el BFF (y otros servicios)
- * llaman para verificar un JWT sin tener que replicar la lógica.
- */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -68,6 +62,15 @@ public class AuthController {
                 user.getEmail(),
                 user.getRol().name()
         ));
+    }
+
+    @DeleteMapping("/usuarios/{id}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     public record UserResponse(Long id, String nombre, String email, String rol) {}
